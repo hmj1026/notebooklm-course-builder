@@ -2,6 +2,10 @@
 
 **[English](README.en.md) | [繁體中文](README.md)**
 
+[![skills.sh](https://img.shields.io/badge/skills.sh-notebooklm--course--builder-6366f1?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0xMiAydjIwTTIgMTJoMjAiLz48L3N2Zz4=)](https://skills.sh/hmj1026/notebooklm-course-builder/notebooklm-course-builder)
+[![Release](https://img.shields.io/github/v/release/hmj1026/notebooklm-course-builder)](https://github.com/hmj1026/notebooklm-course-builder/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 一個將課程大綱轉化為系統化、具權威來源引用的完整 NotebookLM 課程建置 AI Agent 技能。
 
 ---
