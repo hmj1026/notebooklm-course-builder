@@ -1,0 +1,6 @@
+interface:
+  display_name: "NotebookLM Course Builder"
+  short_description: "Build verified, citation-backed courses in NotebookLM"
+  default_prompt: "請協助我將課程大綱轉化為 NotebookLM 課程教材"
+policy:
+  allow_implicit_invocation: true
