@@ -1,5 +1,7 @@
 # Module Completion
 
+Auto mode 由代理依 [automation.md](automation.md) 操作並讀取結果；Module Review 通過後必須先進入 Module Finalization Gate，核准後才產生 Quiz、Study Guide 與封存結果。本文的「指引使用者」只適用 guided mode。
+
 當一個 Module 的所有單元已通過 Final Check 並儲存時使用本參考。
 
 ## 驗收前提
@@ -144,8 +146,8 @@ Module：{MODULE_NAME}
 1. 建議 Notebook 名稱。
 2. 下一 Module 的單元清單與一句整體目標。
 3. Research Cluster 草案與共享來源策略。
-4. 一個確認問題。
+4. Guided mode 的一個確認問題；auto mode 將此規劃併入前一個 Module Finalization Gate。
 
-取得使用者對下一 Module 規劃的明確確認後，方可產生 Fast Research Prompt 並回到主流程的 Notebook／大綱 Source 步驟。
+Guided mode 取得使用者對下一 Module 規劃的明確確認後，方可產生 Fast Research Prompt。Auto mode 在 Module Finalization Gate 核准後直接回到主流程的 Notebook／大綱 Source 步驟，不再新增確認關卡。
 
 整門課最後一個 Module 完成時，將「下一 Module」改為全課程總結：列出每個 Module 的完成狀態、能力遞進、已知限制與教材資產清單。

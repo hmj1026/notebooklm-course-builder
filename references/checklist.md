@@ -1,6 +1,6 @@
 # Course Building Checklists
 
-本文件提供 NotebookLM 課程建置全流程的完整查核清單，供 AI 代理或課程開發者自檢使用。詳細介面三大面板與按鈕操作請對照 [references/notebooklm-ui-guide.md](notebooklm-ui-guide.md)。
+本文件提供 NotebookLM 課程建置全流程的完整查核清單，供 AI 代理或課程開發者自檢使用。詳細介面三大面板與按鈕操作請對照 [references/notebooklm-ui-guide.md](notebooklm-ui-guide.md)。Auto mode 另須完整套用 [automation.md](automation.md) 的 Run 授權、兩個批次關卡與例外關卡；清單中的介面指引由代理操作並驗證。
 
 ---
 
@@ -10,19 +10,19 @@
 - [ ] 已取得完整課程大綱與目標受眾設定（可使用 [templates/course-outline-template.md](../templates/course-outline-template.md)）
 - [ ] 已釐清先備知識、課程深度與邊界（明確不教的內容）
 - [ ] 已識別單元間的順序與核心依賴關係
-- [ ] 已輸出精簡的「課程地圖」並經使用者確認
+- [ ] 已輸出精簡的「課程地圖」；auto mode 已納入 Run 啟動確認
 
 ### Phase 2: 規劃 Notebook 與 Source Research Cluster
 - [ ] 預設 1 Module 對應 1 本 Notebook（若合併或拆分，已有明確理由）
 - [ ] 已將單元依知識主題分群為 Research Cluster（非每節搜一次）
 - [ ] 每群已定義研究目標、必要知識點與停止條件
-- [ ] 規劃結果已向使用者呈現並獲確認
+- [ ] 規劃結果已向使用者呈現；auto mode 已納入 Run 啟動確認
 
 ### Phase 3: 指引建立 Notebook 與大綱 Source
 - [ ] 已在 NotebookLM 建立／開啟對應的 Notebook
 - [ ] 指引路徑正確：左側「來源」面板 ➔ 點擊 **`+ 新增來源`** ➔ 選擇 **`複製的文字`** 貼入大綱並點擊 **`插入`**
 - [ ] 已將 Module 大綱加入為 **Course Outline Source**
-- [ ] 使用者已回報來源清單或截圖確認
+- [ ] 來源清單已由 snapshot 或使用者回報確認
 - [ ] **防呆檢查**：確認 Sources 清單僅保留大綱與核准來源，研究指令嚴格隔離
 
 ### Phase 4: 產生 Fast Research Prompt
@@ -30,15 +30,15 @@
 - [ ] 指引路徑正確：左側「來源」面板 ➔ 點擊 **`+ 新增來源`** ➔ 選擇 **`快速研究`** 搜尋框貼入 Prompt
 - [ ] 包含必要知識點、來源優先級、排除項與教學目標
 - [ ] 一次只針對單一 Research Cluster 進行研究
-- [ ] 指引使用者貼入 Fast Research 並「展開查看」候選清單，維持未匯入狀態以供逐項審核
+- [ ] 已貼入 Fast Research 並「展開查看」候選清單，維持未匯入狀態以供逐項審核
 
 ### Phase 5: 互動式審核候選來源
 - [ ] 候選清單包含標題、網址／網域與摘要片段（截圖時需逐張判讀）
 - [ ] 依「切題性、權威性、證據直接性、新鮮度、教學適配、獨特價值、邊界風險」評估
 - [ ] 逐項標記三級決策：`Import` / `可選` / `不要 Import`
 - [ ] 每項皆具備具體理由與支援的單元／知識點
-- [ ] 指引使用者僅勾選通過項目，點擊視窗右下角 **`匯入 (Import)`** 按鈕加入來源
-- [ ] 使用者確認後完成 Import，並更新 Source Ledger
+- [ ] Source Import Gate 核准後僅勾選通過項目，點擊視窗右下角 **`匯入 (Import)`** 按鈕加入來源
+- [ ] Import 結果已驗證，並更新 Source Ledger
 
 ### Phase 6: Coverage Analysis
 - [ ] 針對該 Module 所有單元逐一評定：`High` / `Medium` / `Low` / `Missing`
@@ -56,7 +56,7 @@
 - [ ] 指引路徑正確：中間「對話」面板底部的 **`對話輸入框`** 貼入短版 Draft Prompt（約 250～500 字）
 - [ ] 檢查左側來源清單，確認本節所需來源核取方塊均處於勾選狀態
 - [ ] 要求 NotebookLM 僅依據已 Import 之 Sources 撰寫並保留原生引用
-- [ ] 使用者貼回講義內容或摘要後進行品質快檢
+- [ ] 已從 snapshot 或使用者回報取得講義結果並完成品質快檢
 
 ### Phase 9: 教材 Review
 - [ ] 指引路徑正確：於中間「對話」面板（延續同一個對話串）底部的 **`對話輸入框`** 貼入審核指令
@@ -74,7 +74,7 @@
 - [ ] 驗證前輪修改是否完成且無引入新問題
 - [ ] 檢查主要主張是否皆有 NotebookLM 引用支援
 - [ ] 僅輸出 `PASS` 或 `FAIL`
-- [ ] PASS 後立即定稿：指引使用者點擊回答氣泡下方的 **`儲存至記事 (Save to note)`** 保存至右側工作室面板
+- [ ] PASS 後立即定稿：點擊回答氣泡下方的 **`儲存至記事 (Save to note)`**，並驗證已保存至右側工作室面板
 
 ### Phase 12: Module 整體驗收
 - [ ] Module 內所有單元皆已取得 Final Check `PASS` 且已存入記事區
@@ -91,7 +91,7 @@
 ### Phase 14: 封存與推進下一 Module
 - [ ] 記錄並封存當前 Module 的成果（單元清單、核准來源、受限說明、Quiz、Study Guide）
 - [ ] 輸出下一 Module 的 Notebook 與 Cluster 規劃
-- [ ] 使用者確認後回到 Phase 3，循環推進直到整門課程完結
+- [ ] Auto mode 已在 Module Finalization Gate 核准下一 Module 規劃；guided mode 經使用者確認後回到 Phase 3
 
 ---
 

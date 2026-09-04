@@ -12,16 +12,16 @@
 
 ## 📋 概述
 
-**NotebookLM Course Builder Skill** 是一套專為 AI 程式助手（如 Google Antigravity、Claude Code、Cursor 等）設計的專業建課技能。它採用嚴謹的 **14 階段嚮導模式 (Wizard Mode)**，協助講師與內容開發者將粗略的課程大綱（Syllabus）轉化為具備官方文獻佐證、技術正確、無知識斷層且附帶測驗與複習指南的高品質教材。
+**NotebookLM Course Builder Skill** 是一套專為 AI 程式助手（如 Google Antigravity、Claude Code、Cursor 等）設計的專業建課技能。它以條件式瀏覽器自動化執行嚴謹的 **14 階段流程**；工具不可用時仍可使用逐步嚮導，將粗略課綱轉化為具備權威來源、審查證據、測驗與複習指南的教材。
 
 ### 核心哲學
 
-- **嚮導模式 (Wizard Mode)**：每次只推進一個可完成的步驟，避免一次性輸出大量 Prompt 造成混淆。
+- **自動優先、嚮導保底**：代理可操作 NotebookLM、讀取結果並更新進度；只有 Run 啟動、來源匯入與 Module 定稿需要集中確認。
 - **嚴格區隔三大物件**：徹底杜絕將「研究提示詞 (Research Prompt)」誤存為筆記本來源（Source）的常見錯誤。
 - **最小充分來源集 (Minimal Sufficient Source Set)**：堅持品質勝於數量，逐項審核切題性與權威度，拒絕 SEO 農場文與過時資訊。
 - **雙重品質把關機制**：單課進行 3 級 Review (PASS / Minor / Major) 與 Final Check；全模組完成後進行跨單元整合驗收。
 
-> 🚀 **新手初次上手？** 請直接閱讀 [docs/first-course-tutorial.md](docs/first-course-tutorial.md)（從開專案到完成第一堂課的 15 分鐘手把手教學）。
+> **新手初次上手？** 請直接閱讀 [完整新手教學](docs/first-course-tutorial.md)，從安裝 Node.js、自動模式驗證到完成第一堂課逐步操作。
 
 ---
 
@@ -42,14 +42,18 @@ notebooklm-course-builder/
 ├── SKILL.md                          # 技能主檔案（14 階段嚮導方法論與互動契約）
 ├── README.md                         # 專案說明文件（繁體中文）
 ├── README.en.md                      # 專案說明文件（English）
+├── package.json                      # Node 測試與 coverage 指令
 ├── LICENSE                           # MIT 授權條款
 ├── .gitignore                        # Git 忽略設定
 ├── agents/                           # 跨平台代理擴充設定
 │   └── openai.yaml                   # OpenAI Codex / Agent Skills 規格設定檔
 ├── docs/                             # 詳細手冊與教學
+│   ├── browser-automation-setup.md   # Node.js 與自動模式環境建置
+│   ├── browser-automation-setup.en.md # Auto mode setup in English
 │   └── first-course-tutorial.md      # 從零到一建立第一堂課的手把手教學
 ├── references/                       # 深入指引與參考文件（漸進式載入）
 │   ├── checklist.md                  # 14 階段建課查核清單與防呆守則
+│   ├── automation.md                 # 瀏覽器自動化、批次關卡與降級規則
 │   ├── notebooklm-ui-guide.md        # NotebookLM 三大面板、按鈕名稱與輸入位置對照手冊
 │   ├── research-and-sources.md       # 來源研究、審核矩陣與 Coverage 評估指南
 │   ├── lesson-production.md          # 逐節講義生成、審查與修訂規範
@@ -59,14 +63,16 @@ notebooklm-course-builder/
 │   └── course-outline-template.md    # 課程大綱輸入範本
 ├── scripts/                          # 自動化輔助工具
 │   ├── README.md                     # 腳本說明
+│   ├── detect-browser-tools.mjs       # 偵測並選擇瀏覽器 adapter
 │   ├── init-course.sh                # 快速初始化新課程工作區
 │   └── validate-state.sh             # 狀態表完整性與關卡驗證腳本
-└── examples/                         # 完整實戰案例
-    ├── README.md                     # 範例導覽
-    └── python-async-course/          # Python 非同步程式設計建課範例
-        ├── syllabus.md               # 原始大綱
-        ├── build-state.md            # 建課歷程狀態表
-        └── prompts-and-review.md     # 實際對話提示詞與審核歷程
+├── examples/                         # 完整實戰案例
+│   ├── README.md                     # 範例導覽
+│   └── python-async-course/          # Python 非同步程式設計建課範例
+│       ├── syllabus.md               # 原始大綱
+│       ├── build-state.md            # 建課歷程狀態表
+│       └── prompts-and-review.md     # 實際對話提示詞與審核歷程
+└── test/                             # 瀏覽器工具偵測測試
 ```
 
 ---
@@ -118,7 +124,9 @@ flowchart TD
 
 ## 🚀 快速開始
 
-### 0. 安裝技能（三選一）
+> 前置條件：一鍵安裝需要 Node.js／npm；auto mode 與專案測試以 Node.js 22.8.0 以上版本為基準。尚未建置環境時，先閱讀 [完整新手教學](docs/first-course-tutorial.md)。
+
+### 0. 安裝技能（二選一）
 
 - **🌟 方式 A（最推薦 - skills.sh 一鍵安裝）**：
   ```bash
@@ -126,8 +134,6 @@ flowchart TD
   ```
 - **🤖 方式 B（AI 幫你裝 - 直接複製貼給你的 AI 助手）**：
   > 「請幫我安裝 `https://github.com/hmj1026/notebooklm-course-builder` 技能至目前環境（Claude Code / Claude Cowork / ChatGPT App / Antigravity / Cursor）的技能目錄中並確認就緒。」
-- **💻 方式 C（手動安裝）**：
-  各平台詳細目錄（含 ChatGPT App、Claude Cowork、Antigravity）請參考 [docs/first-course-tutorial.md](docs/first-course-tutorial.md#步驟-0環境準備與技能安裝新手無痛指南)。
 
 ### 1. 準備課程大綱
 
@@ -144,7 +150,7 @@ flowchart TD
 
 ### 2. 使用輔助腳本初始化（可選）
 
-在終端機中快速建立課程工作區：
+在這個 repository 根目錄使用 Bash 快速建立課程工作區；Windows 請使用 Git Bash 或 WSL：
 
 ```bash
 # 初始化新課程目錄
@@ -154,7 +160,21 @@ flowchart TD
 vim courses/my-course/course-outline.md
 ```
 
-### 3. 向 AI 助手下達指令
+### 3. 啟用瀏覽器自動化（選用）
+
+需要 Node.js 22.8.0 以上版本，並安裝一套 browser adapter。首選快速安裝：
+
+```bash
+npx skills add vercel-labs/agent-browser
+npm install -g agent-browser
+agent-browser install
+agent-browser --version
+agent-browser doctor --offline --quick --json
+```
+
+版本指令與 doctor 都通過後，讓 AI 助手執行技能內建完整 preflight。完整提示詞、Node.js 安裝、`playwright-cli` 備援與 `PATH` 排錯請閱讀 [自動模式備援安裝與排錯](docs/browser-automation-setup.md)。
+
+### 4. 向 AI 助手下達指令
 
 將大綱貼給 AI 助手（例如在 Antigravity、Claude Code 或 Cursor 中）：
 
@@ -164,16 +184,17 @@ vim courses/my-course/course-outline.md
 [貼上您的課程大綱內容]
 ```
 
-AI 助手將啟動嚮導模式，從「Phase 1: 課程大綱解析」開始引導您完成每一步驟。
+AI 助手會重新執行完整 preflight。自動模式可用時，它會先確認 Run 範圍，接著操作 NotebookLM；否則讓你選擇排錯或從 Phase 1 啟動 guided mode。
 
 ---
 
 ## 🛠️ 輔助工具腳本
 
-本專案提供 Bash 實用腳本，詳見 [scripts/README.md](scripts/README.md)：
+本專案提供命令列輔助工具，詳見 [scripts/README.md](scripts/README.md)：
 
 - **`./scripts/init-course.sh <name>`**：建立 `courses/<name>/` 並放置初始 `build-state.md` 與 `course-outline.md`。
 - **`./scripts/validate-state.sh <path>`**：解析並檢查狀態表，提早發現未解的來源缺口或待審查單元。
+- **`node scripts/detect-browser-tools.mjs [--json]`**：偵測 `agent-browser`／`playwright-cli` 並輸出 auto 或 guided 選路結果。
 
 ---
 
@@ -206,7 +227,7 @@ Review 僅允許三種客觀判定：
 
 1. **堅持步驟推進**：遵循嚮導模式逐步確認，守住每階段的上下文與來源品質。
 2. **謹慎看待來源數量**：追求「最小充分來源集」，5 篇切題且權威的來源，遠勝過 30 篇品質參差不齊的網路文章。
-3. **截圖回傳支援**：當 NotebookLM 搜尋出候選來源時，直接截圖回傳供 AI 快速辨識，大幅降低打字搬運成本。
+3. **集中式確認**：auto mode 由代理擷取候選與生成結果；使用者留在代理對話中，以結構化問題完成來源與 Module 的批次確認。
 4. **狀態表持久化**：持續維護 `build-state.md`，支援隨時以 `/resume` 無縫接軌建課進度。
 
 ---
@@ -244,7 +265,9 @@ Review 僅允許三種客觀判定：
 ## 🔗 相關資源
 
 - [docs/first-course-tutorial.md](docs/first-course-tutorial.md) - 新手入門：手把手建立第一堂課
+- [docs/browser-automation-setup.md](docs/browser-automation-setup.md) - Node.js 與自動模式環境建置
 - [SKILL.md](SKILL.md) - 技能核心方法論
+- [references/automation.md](references/automation.md) - 瀏覽器自動化、批次關卡與降級規則
 - [references/notebooklm-ui-guide.md](references/notebooklm-ui-guide.md) - NotebookLM 介面與按鈕導覽手冊
 - [references/checklist.md](references/checklist.md) - 14 階段查核清單
 - [references/research-and-sources.md](references/research-and-sources.md) - 來源研究與審查矩陣

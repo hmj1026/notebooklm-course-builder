@@ -14,6 +14,18 @@
 - 目前階段：
 - 下一個使用者動作：
 
+## Automation Run
+
+- 模式：Auto／Guided
+- Adapter：agent-browser／playwright-cli／Manual
+- 最近 Run ID：
+- 目標 Notebook：
+- 最後驗證 checkpoint：
+- Pending gate：None／Run Start／Source Import／Module Finalization／Exception
+- Blocker：None
+
+> Run 授權只在當次對話有效；狀態表記錄進度，不代表下次 `/resume` 已獲授權。
+
 ## Course Map
 
 | Module | 單元 | 核心成果 | 依賴 | 後續邊界 | 狀態 |

@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-09-04
+
+### Added
+- Conditional browser automation with `agent-browser` as the preferred adapter and `playwright-cli` as fallback.
+- Run-level authorization, source-import and module-finalization batch gates, bounded retries, and observable checkpoints.
+- A deterministic Node/runtime and browser-tool preflight command with behavior tests and coverage thresholds.
+
+### Changed
+- The 14-stage workflow now defaults to auto mode when a supported browser adapter is ready, while preserving guided mode and existing build-state compatibility.
+- Course state now records automation mode, adapter, run identity, checkpoint, pending gate, and blocker.
+- The beginner tutorial now starts with terminal, Node.js, skill, adapter, preflight, and first-sign-in completion criteria; fallback setup and troubleshooting remain behind targeted links.
+
 ## [1.0.0] - 2026-09-03
 
 ### Added
