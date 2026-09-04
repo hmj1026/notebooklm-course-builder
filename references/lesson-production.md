@@ -1,5 +1,7 @@
 # Lesson Production
 
+Auto mode 由代理依 [automation.md](automation.md) 發送 Prompt、讀取結果、驗證與存記事；本文的「指引使用者」只適用 guided mode。
+
 進入單節 Draft、Review、Revision 或 Final Check 時使用本參考。一次只處理一節。
 
 ## 生成前準備
@@ -59,7 +61,7 @@
 
 1. 保留本節名稱、學習成果、核心結構、心智模型與四條關鍵限制。
 2. 刪除背景敘述、逐項展開與已存在 Sources 中的內容。
-3. 仍過長時先請 NotebookLM 產生 6～10 項講義結構；使用者確認後再要求依該結構寫正式講義。
+3. 仍過長時先請 NotebookLM 產生 6～10 項講義結構；auto mode 依已核准課綱驗證結構，guided mode 由使用者確認，再要求依該結構寫正式講義。
 
 ## Draft 快速檢視
 

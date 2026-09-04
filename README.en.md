@@ -12,16 +12,16 @@ A systematic AI Agent skill that transforms raw course syllabi into source-groun
 
 ## 📋 Overview
 
-**NotebookLM Course Builder Skill** is an agentic instruction suite designed for AI coding assistants (such as Google Antigravity, Claude Code, Cursor, Windsurf, etc.). It guides instructors, developers, and educators through a structured **14-stage Wizard Workflow**, transforming high-level syllabi into lesson handouts with authoritative citations, verified technical accuracy, zero knowledge gaps, and accompanying quizzes and study guides.
+**NotebookLM Course Builder Skill** is an agentic instruction suite for AI coding assistants such as Google Antigravity, Claude Code, Cursor, and Windsurf. It runs a structured **14-stage workflow** through conditional browser automation, with a guided fallback when browser tools are unavailable.
 
 ### Core Philosophy
 
-- **Wizard Mode**: Advances one actionable step at a time. Never overwhelms the user with huge walls of prompts upfront.
+- **Automation First, Guided Fallback**: The agent can operate NotebookLM, read results, and update progress; human decisions are concentrated at run start, source import, and module finalization.
 - **Strict Separation of 3 NotebookLM Objects**: Eliminates the common mistake of saving a "Research Prompt" as a Notebook Source.
 - **Minimal Sufficient Source Set**: Prioritizes source quality, authority, and relevance over sheer volume. Filters out SEO content farms and outdated materials.
 - **Dual-Tier Quality Gates**: Unit-level review with explicit verdicts (`PASS` / `Needs Minor Revision` / `Needs Major Revision`), followed by comprehensive end-of-module integration checks.
 
-> 🚀 **New here?** Start with [docs/first-course-tutorial.md](docs/first-course-tutorial.md) for a 15-minute hands-on tutorial from project setup to completing your first course module!
+> **New here?** Start with the [complete beginner tutorial](docs/first-course-tutorial.md), from Node.js and auto-mode setup through the first course build.
 
 ---
 
@@ -42,14 +42,18 @@ notebooklm-course-builder/
 ├── SKILL.md                          # Main skill file (14-phase wizard methodology & interaction contract)
 ├── README.md                         # Project documentation (繁體中文)
 ├── README.en.md                      # Project documentation (English)
+├── package.json                      # Node test and coverage commands
 ├── LICENSE                           # MIT License
 ├── .gitignore                        # Git ignore rules
 ├── agents/                           # Cross-platform agent configurations
 │   └── openai.yaml                   # OpenAI Codex / Agent Skills specification sidecar
 ├── docs/                             # Manuals & Tutorials
+│   ├── browser-automation-setup.md   # Node.js and auto mode setup in Chinese
+│   ├── browser-automation-setup.en.md # Auto mode setup in English
 │   └── first-course-tutorial.md      # Hands-on tutorial: Build your first course from scratch
 ├── references/                       # Progressive disclosure deep dives
 │   ├── checklist.md                  # Complete 14-stage checklist & anti-pattern guardrails
+│   ├── automation.md                 # Browser automation, batch gates & fallback rules
 │   ├── notebooklm-ui-guide.md        # Exact 3-panel UI mapping, button names & input locations
 │   ├── research-and-sources.md       # Source research prompt design, review matrix & coverage rules
 │   ├── lesson-production.md          # Lesson draft generation, review & revision guidelines
@@ -59,14 +63,16 @@ notebooklm-course-builder/
 │   └── course-outline-template.md    # Standard course outline / syllabus input template
 ├── scripts/                          # Automation & helper scripts
 │   ├── README.md                     # Script documentation
+│   ├── detect-browser-tools.mjs       # Detect and select a browser adapter
 │   ├── init-course.sh                # Scaffolding script for new course workspaces
 │   └── validate-state.sh             # Build-state completeness & gate validation script
-└── examples/                         # Real-world end-to-end examples
-    ├── README.md                     # Example catalog
-    └── python-async-course/          # Complete Python Async Programming course build
-        ├── syllabus.md               # Raw syllabus input
-        ├── build-state.md            # Persisted build-state ledger
-        └── prompts-and-review.md     # Actual wizard dialogue, prompts, review verdicts
+├── examples/                         # Real-world end-to-end examples
+│   ├── README.md                     # Example catalog
+│   └── python-async-course/          # Complete Python Async Programming course build
+│       ├── syllabus.md               # Raw syllabus input
+│       ├── build-state.md            # Persisted build-state ledger
+│       └── prompts-and-review.md     # Actual wizard dialogue, prompts, review verdicts
+└── test/                             # Browser tool detection tests
 ```
 
 ---
@@ -118,7 +124,9 @@ flowchart TD
 
 ## 🚀 Quick Start
 
-### 0. Install the Skill (Choose One)
+> Prerequisite: one-click installation requires Node.js and npm; auto mode and repository tests use Node.js 22.8.0 or newer as their supported baseline. If Node.js is not ready, start with the [complete beginner tutorial](docs/first-course-tutorial.md).
+
+### 0. Install the Skill (Choose One of Two)
 
 - **🌟 Method A (Recommended - skills.sh one-click install)**:
   ```bash
@@ -126,8 +134,6 @@ flowchart TD
   ```
 - **🤖 Method B (AI-Assisted - Copy & paste to your AI assistant)**:
   > "Please install the `https://github.com/hmj1026/notebooklm-course-builder` skill into my current environment's skills directory (Claude Code / Claude Cowork / ChatGPT App / Antigravity / Cursor) and confirm readiness."
-- **💻 Method C (Manual installation)**:
-  See [docs/first-course-tutorial.md](docs/first-course-tutorial.md#步驟-0環境準備與技能安裝新手無痛指南) for exact directory paths for ChatGPT App, Claude Cowork, Antigravity, and Codex.
 
 ### 1. Prepare Your Course Outline
 
@@ -144,7 +150,7 @@ Copy [templates/course-outline-template.md](templates/course-outline-template.md
 
 ### 2. Initialize Course Directory (Optional)
 
-Use the provided helper script to scaffold a workspace:
+From this repository root, use Bash to scaffold a workspace. On Windows, use Git Bash or WSL:
 
 ```bash
 # Scaffold new course directory
@@ -154,7 +160,21 @@ Use the provided helper script to scaffold a workspace:
 vim courses/my-course/course-outline.md
 ```
 
-### 3. Prompt Your AI Assistant
+### 3. Enable Browser Automation (Optional)
+
+Auto mode requires Node.js 22.8.0 or newer and one browser adapter. Quick install with the preferred adapter:
+
+```bash
+npx skills add vercel-labs/agent-browser
+npm install -g agent-browser
+agent-browser install
+agent-browser --version
+agent-browser doctor --offline --quick --json
+```
+
+After both the version command and doctor pass, ask the AI assistant to run the skill's complete built-in preflight. For the exact prompt, Node.js setup, the `playwright-cli` fallback, and `PATH` troubleshooting, see [Auto Mode Fallback Setup and Troubleshooting](docs/browser-automation-setup.en.md).
+
+### 4. Prompt Your AI Assistant
 
 Provide the outline to your AI coding assistant (Google Antigravity, Claude Code, Cursor, etc.):
 
@@ -164,16 +184,17 @@ Please use the notebooklm-course-builder skill to help me build a complete cours
 [Paste your syllabus content here]
 ```
 
-The AI assistant will initiate Wizard Mode starting with **Phase 1: Course Outline Analysis**.
+The assistant reruns complete preflight. When auto mode is healthy, it confirms the run scope before operating NotebookLM. Otherwise it lets you troubleshoot or start guided mode at **Phase 1: Course Outline Analysis**.
 
 ---
 
 ## 🛠️ Helper Scripts
 
-Utility bash scripts are located in `scripts/` (see [scripts/README.md](scripts/README.md)):
+Command-line helpers are located in `scripts/` (see [scripts/README.md](scripts/README.md)):
 
 - **`./scripts/init-course.sh <name>`**: Scaffolds `courses/<name>/` with populated `build-state.md` and `course-outline.md`.
 - **`./scripts/validate-state.sh <path>`**: Validates your `build-state.md` against missing fields, unresolved gaps, and review bottlenecks.
+- **`node scripts/detect-browser-tools.mjs [--json]`**: Detects `agent-browser` or `playwright-cli` and reports the auto/guided route.
 
 ---
 
@@ -206,7 +227,7 @@ Reviews strictly enforce three actionable verdicts:
 
 1. **Step-by-Step Discipline**: Advance one verified gate at a time. Grounding in NotebookLM requires incremental, validated steps.
 2. **Value Precision over Volume**: Strive for a "Minimal Sufficient Source Set" — 4–5 authoritative sources far outperform 30 unvetted articles.
-3. **Screenshot-Assisted Triage**: When NotebookLM returns candidate sources, provide a quick screenshot for rapid AI parsing without manual typing.
+3. **Concentrated Confirmations**: In auto mode the agent extracts candidates and generated results; the user stays in the agent conversation and decides through structured source and module gates.
 4. **State Persistence**: Maintain `build-state.md` to enable seamless session resumes anytime with `/resume`.
 
 ---
@@ -217,7 +238,7 @@ Built strictly adhering to modern open Agent Skill specifications (natively comp
 
 - ✅ **Cross-Platform Standard**: Includes `SKILL.md` (universal standard) and `agents/openai.yaml` (OpenAI sidecar), ensuring seamless portability across major agent tools.
 - ✅ **Standard YAML Frontmatter**: Precise `name` and trigger-rich `description`.
-- ✅ **Progressive Disclosure**: Concise `SKILL.md` (< 200 lines) with modular `references/` to minimize context token usage.
+- ✅ **Progressive Disclosure**: Workflow-focused `SKILL.md` with branch-specific details in modular `references/`.
 - ✅ **Verifiable Milestones**: Explicit completion criteria and user response formats per step.
 - ✅ **Reproducible Templates & Verification**: Complete examples, reusable templates, and CLI inspection scripts.
 
@@ -244,7 +265,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🔗 Related Resources
 
 - [docs/first-course-tutorial.md](docs/first-course-tutorial.md) - Hands-on Tutorial: Build Your First Course
+- [docs/browser-automation-setup.en.md](docs/browser-automation-setup.en.md) - Node.js and Auto Mode Setup
 - [SKILL.md](SKILL.md) - Main Skill Instructions
+- [references/automation.md](references/automation.md) - Browser Automation, Batch Gates & Fallback Rules
 - [references/notebooklm-ui-guide.md](references/notebooklm-ui-guide.md) - NotebookLM UI & Button Operation Manual
 - [references/checklist.md](references/checklist.md) - 14-Stage Checklists
 - [references/research-and-sources.md](references/research-and-sources.md) - Research & Source Evaluation Guide

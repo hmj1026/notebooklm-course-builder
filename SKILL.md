@@ -1,18 +1,30 @@
 ---
 name: notebooklm-course-builder
-description: 14 階段嚮導式建構 NotebookLM 課程教材。適用於：(1) 將課程大綱/syllabus 轉為包含來源引用、逐節講義、Quiz 與 Study Guide 的完整課程；(2) 規劃 Notebook 與研究分群、來源審核、Coverage 分析；(3) 延續既有 NotebookLM 課程建置。
+description: 以條件式瀏覽器自動化或 14 階段嚮導建構 NotebookLM 課程教材。適用於：(1) 將課程大綱轉為包含來源引用、逐節講義、Quiz 與 Study Guide 的完整課程；(2) 規劃 Notebook 與研究分群、來源審核、Coverage 分析；(3) 自動操作 NotebookLM 或延續既有建置進度。
 ---
 
 # NotebookLM Course Builder
 
-把課程大綱轉成一套有來源、可驗收、可持續推進的 NotebookLM 教材。代理負責規劃、產生短版 Prompt、判讀結果與守住品質關卡；使用者保留 NotebookLM 介面操作與來源 Import 的最終決定。
+把課程大綱轉成一套有來源、可驗收、可持續推進的 NotebookLM 教材。代理負責規劃、產生短版 Prompt、判讀結果與守住品質關卡；可用的瀏覽器工具負責介面操作，使用者透過少量結構化關卡保留來源 Import 與 Module 定稿決定。
+
+## 啟動路由
+
+除非使用者指定手動嚮導，先解析本 `SKILL.md` 所在目錄並執行其中的 `node scripts/detect-browser-tools.mjs --json`。Node 不存在、腳本失敗或輸出無法解析時 fail closed 至 guided mode：
+
+- `mode=auto`：完整讀取 [references/automation.md](references/automation.md)，載入所選瀏覽器工具的技能指引，依其中的 Run 授權、動作迴圈與兩個批次關卡執行。
+- `mode=guided`：使用本檔的手動嚮導。若宿主提供結構化問題工具，讓使用者選擇安裝 `agent-browser`、安裝 `playwright-cli` 或繼續手動；否則用一個簡短問題詢問。
+- 使用者明確指定 adapter 時仍先驗證該工具；不可用時依 `agent-browser → playwright-cli → guided` 降級。
+
+當 `node.ready=false`、Node 指令不存在，或使用者要求建置自動環境時，完整讀取 [docs/browser-automation-setup.md](docs/browser-automation-setup.md)，一次只引導其中一個安裝或驗證步驟。每步取得可觀測完成結果後再繼續；安裝工具前仍需使用者明確確認。
+
+瀏覽器登入、Notebook 寫入與狀態更新需要每次 Run 的一次性確認。Run 授權只涵蓋已命名的課程與 Notebook，不跨 `/resume` 或新對話沿用。
 
 ## 互動契約
 
-- 採用嚮導模式。每次只推進一個可完成的步驟，嚴格聚焦當前步驟，避免提前展開後續流程。
-- 每次回覆只包含：目前目標、NotebookLM 精確操作位置（依左側來源／中間對話／右側工作室面板）、這一步要貼的單一短 Prompt 或單一審核表、完成判準、使用者回傳格式。完整介面與按鈕對照請參閱 [references/notebooklm-ui-guide.md](references/notebooklm-ui-guide.md)。
+- Guided mode 每次只推進一個可完成的步驟；auto mode 可連續推進已通過可觀測完成判準的步驟，只在批次關卡、例外關卡或完成時回報。
+- Guided mode 的回覆只包含：目前目標、NotebookLM 精確操作位置（依左側來源／中間對話／右側工作室面板）、這一步要貼的單一短 Prompt 或單一審核表、完成判準、使用者回傳格式。完整介面與按鈕對照請參閱 [references/notebooklm-ui-guide.md](references/notebooklm-ui-guide.md)。
 - 已有足夠資訊時直接產生當前步驟；只有會改變課程結構、來源取捨或教材邊界的缺失才詢問。
-- 需要使用者確認、貼回結果或提供截圖時，在該關卡停止。取得結果後先判讀，再給下一步。
+- Auto mode 由代理讀取頁面結果與擷取必要截圖；使用者只處理 Run 啟動、來源匯入、Module 定稿與例外關卡。Guided mode 才要求使用者貼回結果。
 - 介面名稱或位置以使用者實際畫面為準。看不清狀態時請使用者提供目前畫面；依使用者實際可見的按鈕操作。
 - 使用者若只回覆「完成」「下一步」或一張截圖，先依目前狀態判斷結果，不重新開始流程。
 - 預設以繁體中文協作；依使用者要求切換教材語言。技術術語第一次出現時可保留英文。
@@ -56,7 +68,7 @@ description: 14 階段嚮導式建構 NotebookLM 課程教材。適用於：(1) 
 - 受眾、先備知識、課程深度與不應提前教授的內容
 - 名稱不一致、重疊、斷層與需要確認的歧義
 
-輸出精簡的「課程地圖」、Mermaid 單元依賴拓撲圖與必要假設，請使用者確認。待結構獲確認後再啟動來源研究。
+輸出精簡的「課程地圖」、Mermaid 單元依賴拓撲圖與必要假設。Auto mode 將其納入 Run 啟動確認；guided mode 直接請使用者確認。待結構獲確認後再啟動來源研究。
 
 **完成判準：** Module／單元結構、受眾與課程邊界獲使用者確認。
 
@@ -66,13 +78,13 @@ description: 14 階段嚮導式建構 NotebookLM 課程教材。適用於：(1) 
 
 將單元依共同知識、共同權威來源與教學依賴分成 Research Cluster。Cluster 以知識主題為單位，不以「每節各搜一次」為預設；每群通常涵蓋數個相近單元，但複雜或獨立主題可單獨成群。
 
-輸出當前 Module 的 Notebook 名稱、包含單元、Cluster、每群研究目標與停止條件，請使用者確認。
+輸出當前 Module 的 Notebook 名稱、包含單元、Cluster、每群研究目標與停止條件。Auto mode 將其納入同一次 Run 啟動確認；guided mode 直接請使用者確認。
 
 **完成判準：** 當前 Module 的 Notebook 與 Cluster 設計獲確認。
 
 ### 3. 指引建立 Notebook 與大綱 Source
 
-一次只給一個介面動作。先指引建立／開啟 Notebook，再引導至左側「來源 (Sources)」面板 ➔ 點擊「+ 新增來源 (+ Add sources)」 ➔ 選擇「複製的文字 (Copied text)」貼上當前 Module 大綱並點擊「插入 (Insert)」，確認大綱成為 Course Outline Source。請使用者回報來源清單或截圖。
+建立／開啟 Notebook，再至左側「來源 (Sources)」面板 ➔ 點擊「+ 新增來源 (+ Add sources)」 ➔ 選擇「複製的文字 (Copied text)」貼上當前 Module 大綱並點擊「插入 (Insert)」，確認大綱成為 Course Outline Source。Auto mode 由代理操作並驗證；guided mode 一次只給使用者一個介面動作，再請其回報來源清單或截圖。
 
 **完成判準：** 左側來源清單中只有正確大綱與既有核准來源；研究指令沒有被誤存成 Source。
 
@@ -80,11 +92,11 @@ description: 14 階段嚮導式建構 NotebookLM 課程教材。適用於：(1) 
 
 進入來源研究時，完整讀取 [references/research-and-sources.md](references/research-and-sources.md)，依其中規則只為目前一個 Cluster 產生短版 Prompt。Prompt 應描述主題、必要知識、來源偏好、排除項與教材目的，不重貼整份大綱。
 
-指引使用者至左側「來源」面板 ➔ 點擊「+ 新增來源」 ➔ 選擇「快速研究 (Fast Research)」標籤頁，將 Prompt 貼入搜尋框按 Enter。研究完成後展開候選清單供逐項評估，保留未匯入狀態。
+至左側「來源」面板 ➔ 點擊「+ 新增來源」 ➔ 選擇「快速研究 (Fast Research)」標籤頁，將 Prompt 貼入搜尋框按 Enter。研究完成後展開候選清單供逐項評估，保留未匯入狀態。
 
-**截圖優先支援：** 鼓勵使用者直接使用截圖快捷鍵（Win+Shift+S / Cmd+Shift+4）截取候選清單貼回，無需手動複製標題與網址。
+**結果擷取：** Auto mode 直接從 snapshot 讀取候選，視覺資訊不足時由代理擷取暫存截圖。Guided mode 才請使用者截取候選清單貼回，無需手動複製標題與網址。
 
-**完成判準：** 使用者提供該批候選清單的文字（標題與網址）或完整畫面截圖。
+**完成判準：** Auto mode 已擷取完整候選資料；guided mode 已收到候選清單文字或完整畫面截圖。
 
 ### 5. 互動式審核候選來源
 
@@ -94,17 +106,17 @@ description: 14 階段嚮導式建構 NotebookLM 課程教材。適用於：(1) 
 - `可選`：品質尚可，但屬補充案例、第二觀點或與核心來源部分重複。
 - `不要 Import`：錯題、低品質、過時、內容農場、產品線混淆、深度不合或重複價值低。
 
-每項必須寫一個具體理由與支援的單元／知識點。來源看似權威不等於切題；官方文件若產品或主題不符，也可列為不要 Import。若畫面只顯示部分候選，先完成可見項目的暫評，再請使用者補齊同一批其餘項目；候選未完整前不建議按全選。
+每項必須寫一個具體理由與支援的單元／知識點。來源看似權威不等於切題；官方文件若產品或主題不符，也可列為不要 Import。若畫面只顯示部分候選，先完成可見項目的暫評；auto mode 嘗試展開清單，仍不完整便進入例外關卡，guided mode 則請使用者補齊畫面。候選未完整前不建議按全選。
 
-**極簡勾選碼：** 審核表最後必須附上一句快速操作指令，例如：`👉 請在候選視窗中：勾選 [1, 2]，忽略 [3, 4]，點擊匯入`。
+**極簡勾選碼：** 審核表最後必須附上一句快速操作指令，例如：`請在候選視窗中：勾選 [1, 2]，忽略 [3, 4]，點擊匯入`。
 
-指引使用者在快速研究候選視窗中，依指示勾選項目並點擊右下角「匯入 (Import)」按鈕。更新 Source Ledger 後才開始下一 Cluster。
+Auto mode 進入 Source Import Gate，核准後由代理勾選並點擊右下角「匯入 (Import)」；guided mode 指引使用者依審核表操作。更新 Source Ledger 後才開始下一 Cluster。
 
 **完成判準：** 該 Cluster 每個候選皆有決策，且核准來源已 Import 加入左側面板。
 
 ### 6. Coverage Analysis
 
-所有初始 Cluster 完成後，指引使用者在中間「對話 (Chat)」面板底部的對話輸入框貼入短版 Coverage Prompt。Coverage 必須逐單元評為 `High`、`Medium`、`Low` 或 `Missing`，列出已有核心知識、真正缺口與是否需要補來源。
+所有初始 Cluster 完成後，在中間「對話 (Chat)」面板底部的對話輸入框貼入短版 Coverage Prompt。Coverage 必須逐單元評為 `High`、`Medium`、`Low` 或 `Missing`，列出已有核心知識、真正缺口與是否需要補來源。
 
 關鍵字出現在來源中不等於有足夠 Coverage。以「能否寫出符合課程深度、技術正確且有引用的講義」判斷。
 
@@ -124,19 +136,19 @@ description: 14 階段嚮導式建構 NotebookLM 課程教材。適用於：(1) 
 
 進入講義階段時，完整讀取 [references/lesson-production.md](references/lesson-production.md)。一次只處理一節，依課程順序產生短版 Draft Prompt：只保留本節目標、必要結構、承接／邊界、必備案例或心智模型、語言與引用要求。
 
-指引使用者在中間「對話 (Chat)」面板底部的對話輸入框貼入 Draft Prompt 並發送。Sources 已承擔知識內容，Prompt 不重述完整教材。若 Prompt 仍太長，優先刪除說明性文字；必要時拆成「先列結構」與「依已確認結構生成」兩則。
+在中間「對話 (Chat)」面板底部的對話輸入框貼入 Draft Prompt 並發送。Sources 已承擔知識內容，Prompt 不重述完整教材。若 Prompt 仍太長，優先刪除說明性文字；必要時拆成「先列結構」與「依已確認結構生成」兩則。
 
-**免全文搬運機制：** 講義全文直接留存於 NotebookLM 中，使用者**無需複製全文貼回終端機**，只需回報「已生成」或大綱章節。
+**免全文搬運機制：** 講義全文直接留存於 NotebookLM 中。Auto mode 由代理讀取並判斷生成結果；guided mode 的使用者**無需複製全文貼回終端機**，只需回報「已生成」或大綱章節。
 
-**完成判準：** NotebookLM 生成完整 v1，且使用者確認生成完畢。
+**完成判準：** NotebookLM 已生成完整 v1；auto mode 已由 snapshot 驗證，guided mode 已收到使用者確認。
 
 ### 9. 教材 Review
 
-**同串內審雙閉環：** 代理產生針對本節風險的 Review Prompt，不重寫講義。指引使用者在中間「對話 (Chat)」面板（**延續同一個對話串**）底部的對話輸入框直接貼入 Review Prompt，讓 NotebookLM 自檢。
+**同串內審雙閉環：** 代理產生針對本節風險的 Review Prompt，不重寫講義。在中間「對話 (Chat)」面板（**延續同一個對話串**）底部的對話輸入框直接貼入 Review Prompt，讓 NotebookLM 自檢。
 
 檢查技術正確性、來源支援、教學順序、範圍邊界、與前後節重複／斷層，以及學習者能否建立預定心智模型。
 
-Review 只允許：`PASS`、`Needs Minor Revision`、`Needs Major Revision`，並要求只列具體可執行項目；文風偏好不構成修改理由。使用者僅需貼回 NotebookLM 的審查判定與問題清單。
+Review 只允許：`PASS`、`Needs Minor Revision`、`Needs Major Revision`，並要求只列具體可執行項目；文風偏好不構成修改理由。Auto mode 由代理直接讀取判定與問題清單；guided mode 的使用者只需貼回這兩項，不搬運講義全文。
 
 **完成判準：** 收到 Review 判定（PASS 或具體問題清單）。
 
@@ -150,15 +162,15 @@ Review 只允許：`PASS`、`Needs Minor Revision`、`Needs Major Revision`，�
 
 ### 11. Final Check
 
-Final Check 只驗證上一輪修正、是否引入新錯誤、主要主張是否有來源支援、是否符合受眾與單元邊界。指引使用者在中間「對話」面板底部的對話輸入框發送 Final Check 指令。只輸出 `PASS` 或 `FAIL`；FAIL 只列阻止定稿的問題。
+Final Check 只驗證上一輪修正、是否引入新錯誤、主要主張是否有來源支援、是否符合受眾與單元邊界。在中間「對話」面板底部的對話輸入框發送 Final Check 指令。只輸出 `PASS` 或 `FAIL`；FAIL 只列阻止定稿的問題。
 
-PASS 後停止修改。指引使用者在該則講義回答氣泡下方點擊「儲存至記事 (Save to note)」（便條紙圖示），將講義保存至右側「工作室 (Studio)」面板的記事區。FAIL 時聚焦於阻礙定稿的關鍵問題進行最小修正，再重跑 Final Check。
+PASS 後停止修改，並在該則講義回答氣泡下方點擊「儲存至記事 (Save to note)」（便條紙圖示），將講義保存至右側「工作室 (Studio)」面板的記事區。Auto mode 由代理完成並驗證；guided mode 指引使用者操作。FAIL 時聚焦於阻礙定稿的關鍵問題進行最小修正，再重跑 Final Check。
 
 **完成判準：** 本節 PASS、已點擊「儲存至記事」，且狀態表記錄正式版本。
 
 ### 12. Module 整體驗收
 
-所有單元定稿後，完整讀取 [references/module-completion.md](references/module-completion.md)。指引使用者在中間「對話」面板底部的對話輸入框發送 Module Review Prompt。驗收整個 Module 的順序、知識斷層、明顯重複、術語首次介紹、技術矛盾、跨節心智模型、範圍與來源支援。
+所有單元定稿後，完整讀取 [references/module-completion.md](references/module-completion.md)，在中間「對話」面板底部的對話輸入框發送 Module Review Prompt。驗收整個 Module 的順序、知識斷層、明顯重複、術語首次介紹、技術矛盾、跨節心智模型、範圍與來源支援。
 
 只在影響學習或技術正確性時要求修改。結果使用 `PASS / Needs Revision` 與 `是否可進入下一 Module：YES / NO`。
 
@@ -166,7 +178,7 @@ PASS 後停止修改。指引使用者在該則講義回答氣泡下方點擊「
 
 ### 13. Quiz 與 Study Guide
 
-Module 通過後，指示使用者建立 Quiz 與 Study Guide：
+Module 通過後建立 Quiz 與 Study Guide：
 - 方式 A（快捷工具）：在右側「工作室 (Studio)」面板點擊「測驗 (Quiz)」或「學習指南 (Study Guide)」卡片自動生成。
 - 方式 B（專屬 Prompt）：在中間「對話」面板底部的對話輸入框貼入 Prompt，生成後點擊回答氣泡下方的「儲存至記事 (Save to note)」保存。
 
@@ -176,7 +188,7 @@ Quiz 以理解、資料流、比較、除錯或情境應用為主；Study Guide 
 
 ### 14. 下一 Module
 
-封存目前 Module：列出已完成單元、核准來源、接受的 Coverage 限制、正式版本、Module Review、Quiz 與 Study Guide。接著只顯示下一 Module 的 Notebook／Cluster 規劃，請使用者確認後回到步驟 3。
+封存目前 Module：列出已完成單元、核准來源、接受的 Coverage 限制、正式版本、Module Review、Quiz 與 Study Guide。若仍有下一 Module，先建立其 Notebook／Cluster 規劃。Auto mode 將該規劃納入當前 Module Finalization Gate；guided mode 顯示規劃並請使用者確認，再回到步驟 3。
 
 整門課完成時，直接輸出課程層級的完成清單與仍存在的明示限制。
 
@@ -192,12 +204,12 @@ Quiz 以理解、資料流、比較、除錯或情境應用為主；Study Guide 
 - 以核心學習目標與權威證據為依據判定研究完成度。
 - 每節清楚承接已學內容並標示後續 Module 邊界，避免重複教授或過早深入。
 
-## 回覆格式
+## Guided mode 回覆格式
 
 除來源審核表外，當前步驟使用這個精簡骨架，明確標註進度儀表板與三大面板位置：
 
 ```text
-📍 [進度: Module X / 單元 Y.Z (階段名稱)]
+[進度: Module X / 單元 Y.Z (階段名稱)]
 
 目前：<Module／單元／階段>
 
@@ -206,11 +218,11 @@ Quiz 以理解、資料流、比較、除錯或情境應用為主；Study Guide 
 <單一可貼入的短 Prompt；若此步不需 Prompt 則省略>
 
 完成判準：<可觀察結果>
-👉 快速操作／回傳：<極簡勾選碼、回報代碼或截圖>
+快速操作／回傳：<極簡勾選碼、回報代碼或截圖>
 ```
 
-嚴格等待當前步驟結果判讀完成後，再輸出下一階段 Prompt。
+Guided mode 嚴格等待當前步驟結果判讀完成後，再輸出下一階段 Prompt。Auto mode 使用 [references/automation.md](references/automation.md) 的進度與關卡格式。
 
 ## 中斷與續推機制 (/resume)
 
-若對話中斷或使用者重啟工作階段，使用者只要輸入 `/resume` 或「繼續進度」，代理立即讀取 `build-state.md` 定位目前暫停的階段、單元與 Notebook，並直接輸出當前步驟的操作指引，無縫接軌繼續建課。
+若對話中斷或使用者重啟工作階段，使用者只要輸入 `/resume` 或「繼續進度」，代理立即讀取 `build-state.md` 定位目前暫停的階段、單元與 Notebook。Auto mode 重新執行 preflight 與 Run 授權，並從最後一個已驗證 checkpoint 繼續；guided mode 直接輸出當前步驟的操作指引。

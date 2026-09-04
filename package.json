@@ -1,0 +1,13 @@
+{
+  "name": "notebooklm-course-builder-skill",
+  "version": "1.1.0",
+  "private": true,
+
+  "type": "module",
+  "engines": {
+    "node": ">=22.8.0"
+  },
+  "scripts": {
+    "test": "node --test --experimental-test-coverage --test-coverage-lines=80 --test-coverage-functions=80 --test-coverage-branches=80"
+  }
+}

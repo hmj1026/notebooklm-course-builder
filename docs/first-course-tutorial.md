@@ -1,169 +1,183 @@
 
-# 手把手教學：從零到一建立你的第一堂 NotebookLM 課程
+# 手把手教學：從零建立第一堂 NotebookLM 課程
 
-本教學專為剛安裝 **`notebooklm-course-builder`** 技能的開發者、講師與教育工作者設計。我們將以一個真實且極簡的課程案例——**《Git 版本控制與團隊協作實戰》**，帶你完整走過一次從專案初始化、大綱吸納、來源研究、講義生成、同串內審、到測驗產出的完整閉環。
+本教學從尚未安裝 Node.js 的電腦開始，帶你完成環境建置、技能安裝、自動模式驗證，以及《Git 版本控制與團隊協作實戰》範例課程。指令一次執行一行；看到每節的「完成判準」後再繼續。
 
----
+## 先選擇操作模式
 
-## 🧭 全流程體驗地圖
+建議使用 **auto mode**：代理操作 NotebookLM，你只處理三個關卡——一次 Run Start，以及每批 Source Import、每個 Module Finalization。Google 登入是 Run 的前置操作，不算關卡。若環境無法支援 browser adapter，你可以接受 **guided mode**，再由技能逐步引導網頁操作。
 
-```
-[本機終端機 / AI 代理]                                   [Google NotebookLM 網頁]
-       │                                                          │
-   1. 專案初始化與課綱確認                                           │
-       │                                                          │
-   2. 規劃 Notebook 與研究分群                                      │
-       │                                                          │
-   3. 指引建立 Notebook ────────────────────────────────────► 建立 Notebook 並匯入大綱
-       │                                                          │
-   4. 提供 Fast Research Prompt ───────────────────────────► 貼入快速研究搜尋框
-       │                                                          │
-   5. 截圖回傳 ◄───────────────────────────────────────────── 截取候選清單
-       │                                                          │
-   6. 輸出審核表與極簡勾選碼 ──────────────────────────────────► 勾選通過項目並點擊匯入
-       │                                                          │
-   7. 提供講義 Draft Prompt ────────────────────────────────► 貼入中央對話框生成講義
-       │                                                          │
-   8. 提供同串審查 Review Prompt ──────────────────────────► 同串對話貼入自檢
-       │                                                          │
-   9. 回傳 PASS 判定 ◄──────────────────────────────────────── 確認通過
-       │                                                          │
-  10. 指引儲存至記事 ────────────────────────────────────────► 點擊「儲存至記事」存檔
-       │                                                          │
-  11. 產出 Quiz & Study Guide ──────────────────────────────► 右側工作室面板一鍵生成
+```text
+環境建置 → 技能與 adapter 就緒 → AI preflight
+                                  ├─ auto：三個確認關卡，其餘由代理操作
+                                  └─ guided：依步驟 3–10 操作 NotebookLM
 ```
 
----
-
-## 步驟 0：環境準備與技能安裝（新手無痛指南）
-
-在開始建課前，你需要將 `notebooklm-course-builder` 安裝至你的 AI 助手環境中。本專案符合開放 Agent Skills 標準，原生支援 **Claude Code / Claude Cowork**、**ChatGPT App / OpenAI Codex**、**Google Antigravity** 與 **Cursor**。
-
-請選擇最適合你的安裝方式（三選一）：
+**完成判準：** 你已決定優先嘗試 auto mode；adapter 最後仍不可用時，可明確選擇 guided mode。
 
 ---
 
-### 🌟 方法 A：使用 skills.sh 一鍵安裝（最推薦、最簡單）
+## 步驟 0：建立自動模式環境
 
-[skills.sh](https://skills.sh) 是開放的 AI Agent 技能管理器，能自動識別並安裝至你的環境：
+### 0.1 開啟終端機
+
+- Windows：開啟「開始」選單，搜尋並啟動 PowerShell。
+- macOS：按下 `Command + Space`，搜尋並啟動「終端機」。
+- Linux：從應用程式選單啟動 Terminal。
+
+接下來的灰底指令都貼在終端機中。每次只貼一行，按 Enter，等待執行結束後再貼下一行。
+
+### 0.2 安裝並驗證 Node.js
+
+先輸入：
 
 ```bash
-# 使用 npx 快速安裝（無需預先安裝任何全域工具）
-npx skills add hmj1026/notebooklm-course-builder
-
-# 或如果你已安裝 skills CLI：
-skills add hmj1026/notebooklm-course-builder
+node --version
 ```
 
----
+- 顯示 `v22.8.0` 或更新版本：繼續下一節。
+- 顯示「找不到指令」或版本較舊：從 [Node.js 官方下載頁](https://nodejs.org/en/download)下載並安裝 LTS 版本，關閉再重新開啟終端機，然後重試。
 
-### 🤖 方法 B：懶人救星——讓 AI 助手幫你裝（直接貼提示詞）
+再確認 Node.js 附帶的兩個工具：
 
-如果你不熟悉終端機指令或資料夾路徑，**最輕鬆的做法是直接把下面這段提示詞複製貼給你的 AI 助手**（無論是 Claude、ChatGPT App、Google Antigravity 或 Cursor）：
+```bash
+npm --version
+npx --version
+```
 
-> 📋 **複製下方提示詞，貼入你的 AI 聊天對話框**：
->
-> ```text
-> 請幫我安裝「NotebookLM 課程建置 (notebooklm-course-builder)」技能。
-> GitHub 存放庫網址為：https://github.com/hmj1026/notebooklm-course-builder
-> 
-> 請幫我執行以下任務：
-> 1. 偵測目前的工作環境（例如 Claude Code / Claude Cowork、Google Antigravity、ChatGPT App / Codex 或 Cursor）。
-> 2. 找到此環境專屬的技能存放目錄（例如 ~/.claude/skills/、~/.gemini/config/skills/、~/.codex/skills/ 或專案內的 .claude/skills/）。
-> 3. 自動將 GitHub 存放庫 clone 或下載軟連結至該目錄。
-> 4. 檢查並確認主規約 SKILL.md 與 agents/openai.yaml 是否就位，完成後向我回報。
-> ```
+**完成判準：** `node`、`npm`、`npx` 三行都顯示版本號，且 Node.js 不低於 `v22.8.0`。
 
-AI 助手收到後會自動為你下載並配置到正確路徑，完全不需要手動翻找目錄！
+### 0.3 安裝 NotebookLM Course Builder 技能
 
----
+```bash
+npx skills add hmj1026/notebooklm-course-builder
+```
 
-### 💻 方法 C：各大主流平台手動安裝路徑
+若終端機詢問是否繼續，輸入 `y` 後按 Enter。安裝位置由 skills 工具依你的 AI 助手環境處理，不需要手動尋找技能資料夾。
 
-若你想手動將技能放置於指定環境，請參考各平台的標準目錄：
+不想自行判讀安裝訊息時，也可以把這段文字貼給 AI 助手：
 
-#### 1. Claude Cowork / Claude Code / Claude Desktop
-- **全域技能目錄**（建議）：
-  ```bash
-  git clone https://github.com/hmj1026/notebooklm-course-builder.git ~/.claude/skills/notebooklm-course-builder
-  ```
-- **單一專案專用**（Cowork 工作區）：
-  在你的工作專案根目錄下建立目錄並軟連結：
-  ```bash
-  mkdir -p .claude/skills
-  ln -s /path/to/notebooklm-course-builder .claude/skills/notebooklm-course-builder
-  ```
+```text
+請安裝 https://github.com/hmj1026/notebooklm-course-builder，
+並確認 SKILL.md、scripts/detect-browser-tools.mjs 與 references/automation.md 可讀取。
+不要開始建課；完成後只回報安裝位置與驗證結果。
+```
 
-#### 2. ChatGPT App / OpenAI Codex
-- **Codex 技能目錄**：
-  ```bash
-  git clone https://github.com/hmj1026/notebooklm-course-builder.git ~/.codex/skills/notebooklm-course-builder
-  ```
-- **ChatGPT App / Desktop**：
-  在 ChatGPT 工作區或專案設定中，將本專案目錄掛載或加入為技能。本專案已內建 `agents/openai.yaml` 側車設定檔，ChatGPT 會自動識別顯示名稱「NotebookLM Course Builder」與預設啟動提示詞。
+若安裝程式要求選擇目標 AI 工具，選取你接下來要開啟課程的助手，例如 Claude Code、Codex 或 Cursor。
 
-#### 3. Google Antigravity / Gemini CLI
-- **Antigravity 全域技能目錄**：
-  ```bash
-  git clone https://github.com/hmj1026/notebooklm-course-builder.git ~/.gemini/config/skills/notebooklm-course-builder
-  ```
+**完成判準：** 終端機或 AI 助手明確回報 `notebooklm-course-builder` 已安裝至你要使用的 AI 工具。
 
-#### 4. Cursor / VS Code (AI Agent)
-- 在專案工作區根目錄中放入：
-  ```bash
-  mkdir -p .cursor/skills
-  cp -r /path/to/notebooklm-course-builder .cursor/skills/
-  ```
+### 0.4 安裝首選 Browser Adapter
 
----
+依序執行：
 
-### ✅ 驗證安裝是否就緒
+```bash
+npx skills add vercel-labs/agent-browser
+npm install -g agent-browser
+agent-browser install
+agent-browser --version
+agent-browser doctor --offline --quick --json
+```
 
-安裝完成後，在你的 AI 助手聊天對話中輸入：
+版本指令應顯示 `agent-browser` 版本，doctor 結果應為成功且沒有 failed check。需要 `playwright-cli` 備援、使用 `nvm`，或遇到 `PATH` 問題時，再閱讀 [自動模式備援安裝與排錯](browser-automation-setup.md)。若暫時不修復 adapter，也可以在下一節選擇 guided mode。
 
-> 「我想規劃一門新課程，請使用 notebooklm-course-builder 技能協助我。」
+**完成判準：** `agent-browser --version` 顯示版本，且 doctor 沒有 failed check；或你已決定本次使用 guided mode。
 
-只要 AI 代理回應了：
-`📍 [進度: 全課規劃 / 大綱解析]`
-或開始引導你輸入課程目標，就代表技能已成功啟動！
+### 0.5 讓 AI 執行 Preflight
+
+技能可能安裝在隱藏資料夾，因此新手不必自行切換到它的目錄。開啟剛才選定且已安裝技能的 AI 工具，在目前教材工作區建立新對話，貼上：
+
+```text
+請使用 notebooklm-course-builder 技能，只執行完整 browser preflight，
+包含 Node、CLI 與 adapter health check；
+不要建立或修改任何 Notebook。請回報 node.ready、mode、selected_adapter，
+adapter_health，以及無法進入 auto mode 時的修復建議。
+```
+
+成功結果應包含：
+
+```text
+node.ready: true
+mode: auto
+selected_adapter: agent-browser
+adapter_health: ready
+```
+
+`mode: auto` 是 CLI 候選結果；只有 `adapter_health: ready` 才代表 browser 可以啟動。若完整 preflight 最後回報 guided，可依原因修復，或明確回覆「本次使用 guided mode」。完整對照見 [排錯章節](browser-automation-setup.md#5-常見問題)。
+
+**完成判準：** AI 回報 `node.ready: true`、`mode: auto`、一個 `selected_adapter` 與 `adapter_health: ready`；或你已明確接受 guided mode。
+
+### 0.6 了解第一次登入
+
+正式開始建課時，代理會開啟技能專用的 browser session。請只在該瀏覽器視窗自行登入 Google；帳號、密碼與驗證碼都留在登入頁，不要貼到 AI 對話。登入完成後，代理會顯示本次 Run 的課程、Notebook、起始 checkpoint 與自動寫入範圍，等你確認才開始。
+
+**步驟 0 完成判準：** Node.js 與技能已就緒，而且你已進入 health check 通過的 auto mode，或明確選擇 guided mode。只有 Node.js 或技能尚未就緒時才停在本步排錯。
 
 ---
 
 ## 步驟 1：建立課程專案工作區
 
-我們為你準備了自動化初始化腳本，能一秒建立標準目錄與追蹤狀態表：
+最簡單的方式是讓 AI 助手使用技能內建範本。在目前要存放教材的工作區開啟 AI 對話，貼上：
+
+```text
+請使用 notebooklm-course-builder 的範本，在目前工作區建立
+courses/git-course/course-outline.md 與 courses/git-course/build-state.md。
+若檔案已存在，先停止並告訴我，不要覆寫。
+```
+
+若你正在這個 GitHub repository 的根目錄，也可以自行執行。macOS／Linux 使用 Terminal；Windows 請使用 Git Bash 或 WSL，不要在 PowerShell 直接執行 Bash 腳本：
 
 ```bash
-# 1. 進入你的課程存放目錄
-cd ~/projects
-
-# 2. 執行初始化腳本（指定專案資料夾與課程名稱）
-/path/to/notebooklm-course-builder/scripts/init-course.sh git-course "Git 版本控制與團隊協作" "初中階軟體工程師"
+./scripts/init-course.sh git-course
 ```
 
 執行後會建立以下結構：
+
 ```
-git-course/
-├── syllabus.md           # 課程大綱檔
-├── build-state.md        # 課程建置歷程與決策追蹤表 (SSOT)
-├── output/               # 正式講義產出存放處
-└── notes/                # 參考筆記
+courses/git-course/
+├── course-outline.md     # 課程大綱
+└── build-state.md        # 建課進度與決策
 ```
+
+若腳本提示目錄已存在，輸入 `N` 取消，再先確認既有內容。只有確定要替換模板時才另行決定是否覆寫。
+
+**完成判準：** 上述兩個檔案存在；新目錄已成功建立，或既有目錄已安全取消且沒有意外覆寫。
 
 ---
 
-## 步驟 2：喚醒 AI 代理與大綱輸入（實戰開始）
+## 步驟 2：啟動第一個建課 Run
 
-### 💬 使用者在聊天室輸入：
-你可以直接貼入零散的筆記或粗略想法，技能支援**雜湊文字吸納模式**：
+你可以直接貼入零散筆記，不必先整理成正式課綱：
 
 > 「我想為團隊內部建立一門《Git 版本控制與團隊協作》課程，受眾是懂基本指令但常遇到 Conflict、不知道如何 rebase 與整理 commit 的初中階工程師。大綱大概有：Git 內部原理（Blob/Tree/Commit/HEAD）、分支管理與 Fast-forward、Rebase vs Merge 決策、互動式 rebase 整理 commit。不教 GitHub Actions CI/CD。」
 
-### 🤖 AI 代理回覆：
-AI 自動結構化大綱，繪製 Mermaid 拓撲依賴圖，並建立防呆邊界：
+### Auto mode 會發生什麼
+
+1. 專用瀏覽器開啟時，由你親自完成 Google 登入。
+2. 代理解析課綱、規劃 Notebook 與 Research Cluster。
+3. 代理顯示 `Run Start`，列出課程、Notebook、adapter、起始 checkpoint 與預定寫入。
+4. 確認內容正確後，選擇「授權本次 Run」。
+
+三個關卡會提供下列選項；選擇暫停或修訂時，代理保留最後 checkpoint，不會把未核准內容記為完成：
+
+| 關卡 | 你要判斷什麼 | 主要選項 |
+|---|---|---|
+| Run Start | 是否授權這次列出的自動寫入範圍 | 授權本次 Run／改用 guided mode／取消 |
+| Source Import | 是否接受建議的來源清單 | 接受並匯入／調整選取／查看理由或暫停 |
+| Module Finalization | 是否接受本 Module 成果與下一步 | 接受並完成／依問題修訂／保存並暫停 |
+
+**Auto mode 完成判準：** 代理已取得 Run 授權並開始操作，或停在清楚標示原因的 Exception Gate。Auto mode 使用者到此不需照著後面的網頁步驟操作。
+
+---
+
+## Guided mode 操作範例
+
+只有 preflight 回報 `mode: guided`，或你主動選擇 guided mode 時，才需要繼續步驟 3–10。以下範例示範 AI 如何把課綱結構化並逐步請你操作 NotebookLM。
+
+### Guided mode 的 AI 回覆
 
 ```text
-📍 [進度: 全課規劃 / 大綱解析]
+[進度: 全課規劃 / 大綱解析]
 
 已為您解析課程結構與先備關係：
 - 課程名稱：Git 版本控制與團隊協作實戰
@@ -185,19 +199,19 @@ graph TD
 ```
 ```text
 完成判準：請確認 Module 與單元結構是否符合預期？
-👉 快速操作／回傳：若無修改請回傳「確認」，我們將展開 Module 1 規劃。
+快速操作／回傳：若無修改請回傳「確認」，我們將展開 Module 1 規劃。
 ```
 
 ---
 
 ## 步驟 3：在 NotebookLM 建立筆記本並匯入大綱
 
-### 💬 使用者回傳：
+### 使用者回傳：
 > 「確認」
 
-### 🤖 AI 代理回覆：
+### AI 代理回覆：
 ```text
-📍 [進度: Module 1 / 筆記本建立]
+[進度: Module 1 / 筆記本建立]
 
 目前：Module 1: Git 物件原理與分支本質
 
@@ -213,19 +227,19 @@ graph TD
 ---
 
 完成判準：左側來源清單已顯示「Module 1 大綱」。
-👉 快速操作／回傳：完成後請回覆「大綱已匯入」。
+快速操作／回傳：完成後請回覆「大綱已匯入」。
 ```
 
 ---
 
 ## 步驟 4：執行快速研究（Fast Research）與截圖回傳
 
-### 💬 使用者回傳：
+### 使用者回傳：
 > 「大綱已匯入」
 
-### 🤖 AI 代理回覆：
+### AI 代理回覆：
 ```text
-📍 [進度: Module 1 / Cluster 1 來源研究]
+[進度: Module 1 / Cluster 1 來源研究]
 
 目前：Module 1 / Research Cluster 1 (Git 物件與引用機制)
 
@@ -254,21 +268,21 @@ graph TD
 ---
 
 完成判準：NotebookLM 展開候選來源清單。
-👉 快速操作／回傳：請使用 Win+Shift+S (或 Cmd+Shift+4) 直接截取候選視窗畫面貼回，無需手動複製文字！
+快速操作／回傳：使用 Windows `Win+Shift+S`、macOS `Cmd+Shift+4`，或 Linux 桌面環境的截圖工具擷取候選視窗。貼回前遮蔽帳號與不相關的 Notebook 名稱。
 ```
 
 ---
 
 ## 步驟 5：一鍵審核與極簡勾選碼匯入
 
-### 💬 使用者回傳：
+### 使用者回傳：
 （使用者直接在對話貼入 NotebookLM 候選來源清單截圖）
 
-### 🤖 AI 代理回覆：
-代理透過視覺辨識解析截圖，給出專業審核矩陣與**極簡操作指令**：
+### AI 代理回覆：
+代理透過視覺辨識解析截圖，給出來源審核矩陣與操作指令。下表只是格式示例；實際標題、排序與數量以你的畫面為準，不可直接照抄示例編號。
 
 ```text
-📍 [進度: Module 1 / 來源審查]
+[進度: Module 1 / 來源審查]
 
 針對截圖中的 4 個候選來源，審核結果如下：
 
@@ -279,23 +293,23 @@ graph TD
 | 3 | Visualizing Git Concepts | github.io | 可選 | 1.1, 1.2 | 圖解 DAG 與指標運作，適合作為心智模型輔助 |
 | 4 | 5 分鐘學會 Git 常用指令 | blog.csdn.net | 不要 Import | — | 僅列常用指令，無底層原理且排版零散 |
 
-👉 快速操作指令：
+示例操作指令：
 請在 NotebookLM 候選視窗中：手動勾選 [1, 2, 3]，取消勾選 [4]，點擊右下角「匯入 (Import)」按鈕。
 
 完成判準：左側 Sources 清單顯示已匯入這 3 筆來源。
-👉 快速操作／回傳：完成後請回傳「已匯入」。
+快速操作／回傳：完成後請回傳「已匯入」。
 ```
 
 ---
 
 ## 步驟 6：涵蓋度（Coverage）評估
 
-### 💬 使用者回傳：
+### 使用者回傳：
 > 「已匯入」
 
-### 🤖 AI 代理回覆：
+### AI 代理回覆：
 ```text
-📍 [進度: Module 1 / 涵蓋度分析]
+[進度: Module 1 / 涵蓋度分析]
 
 目前：Module 1 Coverage Analysis
 
@@ -314,18 +328,24 @@ graph TD
 ---
 
 完成判準：NotebookLM 給出各單元評級。
-👉 快速操作／回傳：貼回評級結果（例如「兩單元皆為 High」）。
+快速操作／回傳：貼回評級結果（例如「兩單元皆為 High」）。
 ```
 
-使用者回報兩單元皆為 `High`，代表來源充分，可直接啟動講義生成！
+若這次結果剛好是兩單元皆為 `High`，即可進入講義生成。其他結果依下列分支處理：
+
+- `Medium`：確認缺口不影響核心學習成果，記錄接受理由後才能繼續。
+- `Low`／`Missing`：針對一個明確缺口重做 Fast Research 與來源審核，再重跑 Coverage。
+- 同一缺口補強兩輪仍不足：縮小單元承諾、改用使用者提供來源，或記錄 blocker 並暫停。
+
+**完成判準：** 所有單元皆為 `High`，或 `Medium` 已有不影響本課程目標的明確接受理由。
 
 ---
 
 ## 步驟 7：講義 Draft 產出（免全文搬運機制）
 
-### 🤖 AI 代理回覆：
+### AI 代理回覆：
 ```text
-📍 [進度: Module 1 / 單元 1.1 講義生成]
+[進度: Module 1 / 單元 1.1 講義生成]
 
 目前：Unit 1.1: Git 物件儲存機制 Draft v1
 
@@ -355,22 +375,22 @@ graph TD
 - 依據目前 Sources 撰寫並保留原生引用標註 [1], [2]
 ---
 
-完成判準：NotebookLM 生成完整講義草稿。
-👉 快速操作／回傳：💡 免全文搬運！生成後不需要將長文貼回，只需回報「講義已生成」，我們將直接在同串對話進行審核！
+完成判準：NotebookLM 生成完整講義草稿，畫面可見要求的七個章節與來源引用。
+快速操作／回傳：不需要貼回全文；請回報「講義已生成，章節與引用可見」，再於同一對話串進行審核。
 ```
 
 ---
 
 ## 步驟 8：同串內審雙閉環（In-Notebook Review Loop）
 
-### 💬 使用者回傳：
+### 使用者回傳：
 > 「講義已生成」
 
-### 🤖 AI 代理回覆：
+### AI 代理回覆：
 代理直接給出預設的審查指令，讓 NotebookLM 在同一對話串內自檢，省去 90% 複製貼上時間：
 
 ```text
-📍 [進度: Module 1 / 單元 1.1 講義審查]
+[進度: Module 1 / 單元 1.1 講義審查]
 
 目前：Unit 1.1 講義審核 (In-Notebook Review)
 
@@ -396,62 +416,71 @@ graph TD
 ---
 
 完成判準：NotebookLM 給出審查判定。
-👉 快速操作／回傳：貼回判定結果（例如：「PASS」或列出 1~2 個修改項）。
+快速操作／回傳：貼回判定結果（例如：「PASS」或列出 1~2 個修改項）。
 ```
+
+依判定選路：
+
+- `PASS`：進入 Final Check。
+- `Needs Minor Revision`：請 AI 根據問題清單產生最小修訂 Prompt，生成 v2 後再進入 Final Check。
+- `Needs Major Revision`：先回到 Coverage 或 Draft 規格修正，不直接定稿。
 
 ---
 
 ## 步驟 9：Final Check 與存檔至 Studio 記事區
 
-### 💬 使用者回傳：
-> 「NotebookLM 判定 PASS，所有核心概念均精確且有來源引用。」
+Review 為 `PASS`，或 Minor Revision 已產生 v2 後，在同一 NotebookLM 對話輸入：
 
-### 🤖 AI 代理回覆：
 ```text
-📍 [進度: Module 1 / 單元 1.1 定稿存檔]
+請對剛才的 Unit 1.1 正式候選版本做 Final Check。
 
-🎉 恭喜！Unit 1.1 已取得正式 PASS！
+只檢查：
+1. Review 問題是否已解決
+2. 是否引入新技術錯誤
+3. 主要主張是否有來源支援
+4. 是否符合受眾與 Unit 1.1 邊界
 
-請在 NotebookLM：
-1. 找到剛才產生的正式講義回答氣泡。
-2. 點擊回答下方的「儲存至記事 (Save to note)」（便條紙圖示）。
-3. 講義已安全保存至右側「工作室 (Studio)」面板的「記事」區！
-
-本機備份指引（選用）：
-您可以將講義複製貼入本機工作區存檔：
-`output/unit-1-1-git-object-storage.md`
-
-完成判準：講義已出現在右側記事清單。
-👉 快速操作／回傳：回覆「已存記事」，我們將推進至 Unit 1.2！
+只輸出 PASS 或 FAIL。FAIL 時只列阻止定稿的問題。
 ```
+
+- `FAIL`：把問題交給 AI 產生最小修訂 Prompt，修正後重跑 Final Check。
+- `PASS`：找到正式講義回答，點擊「儲存至記事 (Save to note)」，確認右側 Studio 出現記事。
+
+接著對 Unit 1.2 重複步驟 7–9。不得因 Unit 1.1 通過便假設 Unit 1.2 已完成。
+
+**完成判準：** Unit 1.1 與 Unit 1.2 都有各自的 Review、Final Check `PASS` 與 Studio 正式記事。
 
 ---
 
 ## 步驟 10：產出測驗（Quiz）與學習指南（Study Guide）
 
-當 Module 1 的所有單元（Unit 1.1 與 1.2）都完成後，進入總體驗收與測驗生成：
+兩個單元都定稿後，先在 NotebookLM 對話輸入 Module Review：
 
-### 🤖 AI 代理回覆：
 ```text
-📍 [進度: Module 1 / 模組完結與輔助工具]
+請驗收整個 Module 1，檢查單元順序、知識斷層、重複、術語首次介紹、
+技術矛盾、範圍與來源支援。
 
-Module 1 整體驗收通過！現在為學習者產出總複習工具。
-
-請在 NotebookLM：
-【方式 A - 一鍵生成】（推薦）：
-移至右側「工作室 (Studio)」面板：
-1. 點擊「測驗 (Quiz)」快捷卡片 ➔ 自動依來源產出情境測驗題。
-2. 點擊「學習指南 (Study Guide)」快捷卡片 ➔ 自動產出核心心智模型與複習架構。
-
-【方式 B - 自訂 Prompt 生成】：
-在中間對話輸入框貼入以下提示詞發送，生成後點擊「儲存至記事」：
----
-請為「Module 1: Git 物件原理與分支本質」建立 5 題情境理解型測驗。涵蓋三大物件不可變性、Detached HEAD 救回資料流，每題提供詳細解析與推理依據。
----
-
-完成判準：測驗與學習指南已生成。
-👉 快速操作／回傳：回覆「Module 1 完成」，我們將為您封存進度並規劃 Module 2！
+只輸出：
+- PASS 或 Needs Revision
+- 是否可進入下一 Module：YES 或 NO
+- 阻止通過的具體問題
 ```
+
+- `Needs Revision` 或 `NO`：只修正列出的阻塞單元，再重跑 Module Review。
+- `PASS + YES`：進入 Quiz 與 Study Guide。
+
+在右側 Studio 依序點擊「測驗 (Quiz)」與「學習指南 (Study Guide)」。若介面沒有快捷卡片，分別在對話中要求：
+
+```text
+請為 Module 1 建立 5 題情境理解型測驗，每題附答案與解析。
+
+請為 Module 1 建立學習指南，包含核心能力、心智模型、常見誤解、
+單元連結與建議複習順序。
+```
+
+最後封存 Module 1：將正式單元、核准來源、接受的 Coverage 限制、Module Review、Quiz 與 Study Guide 記入 `build-state.md`，把 Module 與相關 Research Cluster 標記為完成或 `Closed`。仍有下一 Module 時，先記錄下一本 Notebook 與 Research Cluster 規劃，再回到建立 Notebook 的步驟。
+
+**完成判準：** Module Review 為 `PASS + YES`，Quiz 與 Study Guide 均可見；Module 1 的成果與限制已封存，相關狀態已標記完成或 `Closed`，且下一 Module 或全課完成狀態已寫入狀態表。
 
 ---
 
@@ -459,19 +488,25 @@ Module 1 整體驗收通過！現在為學習者產出總複習工具。
 
 建課通常無法一次完成。當你中途關閉終端機或隔天繼續時：
 
-1. 重新開啟終端機並進入課程目錄。
-2. 輸入：
-   > `/resume` 或 `繼續進度`
-3. AI 代理將自動解析 `build-state.md`，立即回報：
-   > 「已為您恢復進度！目前位於 **Module 1（已完結）**，已通過審查並保存講義。下一步：開始規劃 **Module 2: 團隊分支協作與整合決策**，是否開始？」
+1. 重新開啟原本的教材工作區與 AI 助手。
+2. 在 AI 對話輸入 `/resume` 或「繼續進度」。
+3. 代理讀取 `build-state.md`，回報最後一個已驗證 checkpoint。
+4. Auto mode 會重新執行 preflight，並請你授權新的 Run；先前 Run 的授權不會沿用。Guided mode 則直接顯示下一個手動步驟。
+
+**完成判準：** 代理回報的課程、Module、Notebook 與 checkpoint 都和中斷前一致；不一致時先修正狀態，不繼續操作。
 
 ---
 
-## 🎯 新手常見問題與防呆提醒 (FAQ)
+## 新手常見問題與防呆提醒 (FAQ)
 
 | 常見情境 | 發生原因 | 正確處置方式 |
 |---|---|---|
+| **Preflight 顯示 `mode: guided`** | Node.js 版本或 browser adapter 未達條件 | 依 [自動模式排錯表](browser-automation-setup.md#5-常見問題)處理；修復後重新執行 preflight。 |
+| **自動模式沒有開啟瀏覽器** | adapter 尚未安裝 browser engine，或 session 啟動失敗 | 執行 `agent-browser install` 後再試一次；仍失敗時把完整錯誤貼給 AI，不貼帳號或密碼。 |
+| **Google 要求重新登入** | 專用 session 的登入已失效 | 在代理開啟的專用視窗自行登入，再回覆「登入完成」。 |
 | **研究提示詞被當成來源** | 誤將 Fast Research Prompt 貼到「複製的文字」 | 前往左側來源面板，點擊該錯誤項目旁邊的三點圖示選擇「移除來源」，重新將提示詞貼入「快速研究」搜尋框。 |
 | **候選來源過多/質量不一** | 搜尋詞包含廣泛關鍵字 | 截圖貼回給 AI，AI 會標註哪些是內容農場並給出「極簡勾選碼」，切勿點擊「全選」。 |
-| **講義審核出現 Needs Revision** | 某個知識點解釋模糊或遺漏案例 | 代理會產生針對該問題的 Minor Revision Prompt，在同一對話串送出修正版，通常 1 次即可通過。 |
+| **講義審核為 Needs Minor Revision** | 有局部且可明確修復的問題 | 讓代理依問題清單產生最小修訂 Prompt，生成 v2 後執行 Final Check。 |
+| **講義審核為 Needs Major Revision** | 來源或講義結構不足 | 回到 Coverage 或 Draft 規格修正，再重新 Review；不要直接存正式記事。 |
+| **Final Check 為 FAIL** | 修訂未完成或引入新問題 | 只修正列出的阻塞問題並重跑 Final Check；通過前不標記完成。 |
 | **在記事區無法直接修改文字** | NotebookLM 的 Saved Notes 預設唯讀 | 點擊卡片右上角 `...` 選擇「匯出至 Google 文件」進行後續微調，或複製全文回本機 Markdown。 |
